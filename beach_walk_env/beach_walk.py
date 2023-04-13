@@ -5,7 +5,7 @@ from beach_walk_env.water import Water
 
 
 class BeachWalkEnv(MiniGridEnv):
-    def __init__(self, size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=None, wind_gust_probability=0.5,
+    def __init__(self, size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=150, wind_gust_probability=0.5,
                  **kwargs):
         self.mission = None
         self.agent_start_pos = agent_start_pos
