@@ -1,5 +1,5 @@
 from gym.spaces import Discrete
-from gym_minigrid.minigrid import MiniGridEnv, Grid, Goal, Lava
+from gym_minigrid.minigrid import MiniGridEnv, Grid, Goal, Lava, Floor
 from beach_walk_env.actions import Actions
 from beach_walk_env.water import Water
 
@@ -35,6 +35,11 @@ class BeachWalkEnv(MiniGridEnv):
 
         # Generate the waterfront
         self.grid.horz_wall(x=1, y=1, length=4, obj_type=Water)
+
+        # Generate beach
+        for x in range(1, 5):
+            for y in range(2, 5):
+                self.grid.set(x, y, Floor(color="yellow"))
 
         # Place the agent
         if self.agent_start_pos is not None:
