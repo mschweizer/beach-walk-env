@@ -5,6 +5,11 @@ from beach_walk_env.water import Water
 
 
 class BeachWalkEnv(MiniGridEnv):
+
+    metadata = {
+        'video.frames_per_second': 5
+    }
+
     def __init__(self, size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=150, wind_gust_probability=0.5,
                  **kwargs):
         self.mission = None
@@ -63,7 +68,7 @@ class BeachWalkEnv(MiniGridEnv):
 
         self.step_count += 1
 
-        reward = 0
+        reward = 0.0
         done = False
 
         # Turn agent in the direction it tries to move
