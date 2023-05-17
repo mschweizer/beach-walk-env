@@ -1,5 +1,6 @@
 from gym.spaces import Discrete
-from gym_minigrid.minigrid import MiniGridEnv, Grid, Goal, Lava, Floor
+from gym.vector.utils import spaces
+from gym_minigrid.minigrid import MiniGridEnv, Grid, Goal, Lava, Floor, OBJECT_TO_IDX
 from beach_walk_env.actions import Actions
 from beach_walk_env.water import Water
 
@@ -28,6 +29,13 @@ class BeachWalkEnv(MiniGridEnv):
         )
         self.actions = Actions
         self.action_space = Discrete(len(self.actions))
+
+        self.observation_space = spaces.Box(
+            low=0,
+            high=max(OBJECT_TO_IDX.values()),
+            shape=(self.width, self.height, 2),  # number of cells
+            dtype="uint8",
+        )
 
         self.total_step_count = 0
 
@@ -91,6 +99,12 @@ class BeachWalkEnv(MiniGridEnv):
         if self.step_count >= self.max_steps:
             done = True
 
-        obs = self.gen_obs()
+        obs = self.simplify_observation(self.gen_obs())
 
         return obs, reward, done, {}
+
+    @staticmethod
+    def simplify_observation(observation):
+        only_img = observation['image']
+        only_obj_type_and_agent_dir = only_img[:, :, (0, 2)]
+        return only_obj_type_and_agent_dir
