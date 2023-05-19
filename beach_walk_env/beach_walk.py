@@ -1,6 +1,7 @@
 from gym.spaces import Discrete
 from gym_minigrid.minigrid import MiniGridEnv, Grid, Goal, Floor
 from gym_minigrid.wrappers import FullyObsWrapper
+from seals.util import AutoResetWrapper
 
 from beach_walk_env.actions import Actions
 from beach_walk_env.observation_wrapper import CustomObsWrapper
@@ -104,4 +105,11 @@ def create_wrapped_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_dir=0,
                        wind_gust_probability, **kwargs)
     env = FullyObsWrapper(env)
     env = CustomObsWrapper(env)
+    return env
+
+
+def create_fixed_horizon_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=150,
+                                    wind_gust_probability=0.5, **kwargs):
+    env = create_wrapped_beach_walk(size, agent_start_pos, agent_start_dir, max_steps, wind_gust_probability, **kwargs)
+    env = AutoResetWrapper(env)
     return env
