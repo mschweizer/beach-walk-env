@@ -1,18 +1,17 @@
-from gym.spaces import Discrete
-from gym_minigrid.minigrid import MiniGridEnv, Grid, Goal, Lava, Floor
+from gymnasium.spaces import Discrete
+from minigrid.core.grid import Grid
+from minigrid.core.mission import MissionSpace
+from minigrid.core.world_object import Floor, Goal
+from minigrid.minigrid_env import MiniGridEnv
+
 from beach_walk_env.actions import Actions
 from beach_walk_env.water import Water
 
 
 class BeachWalkEnv(MiniGridEnv):
 
-    metadata = {
-        'video.frames_per_second': 5
-    }
-
     def __init__(self, size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=150, wind_gust_probability=0.5,
                  **kwargs):
-        self.mission = None
         self.agent_start_pos = agent_start_pos
         self.agent_start_dir = agent_start_dir
         self.wind_gust_probability = wind_gust_probability
@@ -20,6 +19,7 @@ class BeachWalkEnv(MiniGridEnv):
         max_steps = max_steps if max_steps else 4 * size * size
 
         super().__init__(
+            mission_space=MissionSpace(mission_func=lambda: "Avoid the water and get to the green goal square."),
             grid_size=size,
             max_steps=max_steps,
             # Set this to True for maximum speed
@@ -69,7 +69,8 @@ class BeachWalkEnv(MiniGridEnv):
         self.step_count += 1
 
         reward = 0.0
-        done = False
+        terminated = False
+        truncated = False
 
         # Turn agent in the direction it tries to move
         self.agent_dir = action
@@ -83,14 +84,14 @@ class BeachWalkEnv(MiniGridEnv):
         if fwd_cell is None or fwd_cell.can_overlap():
             self.agent_pos = fwd_pos
         if fwd_cell is not None and fwd_cell.type == 'goal':
-            done = True
+            terminated = True
             reward = self._reward()
         if fwd_cell is not None and fwd_cell.type == 'lava':
-            done = True
+            terminated = True
 
         if self.step_count >= self.max_steps:
-            done = True
+            truncated = True
 
         obs = self.gen_obs()
 
-        return obs, reward, done, {}
+        return obs, reward, terminated, truncated, {}
