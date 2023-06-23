@@ -14,14 +14,12 @@ class BeachWalkEnv(MiniGridEnv):
         'video.frames_per_second': 5
     }
 
-    def __init__(self, size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=150, wind_gust_probability=0.5,
+    def __init__(self, size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=25, wind_gust_probability=0.5,
                  **kwargs):
         self.mission = None
         self.agent_start_pos = agent_start_pos
         self.agent_start_dir = agent_start_dir
         self.wind_gust_probability = wind_gust_probability
-
-        max_steps = max_steps if max_steps else 4 * size * size
 
         super().__init__(
             grid_size=size,
@@ -114,7 +112,7 @@ def create_wrapped_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_dir=0,
     return env
 
 
-def create_fixed_horizon_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_dir=0, horizon_length=150,
+def create_fixed_horizon_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_dir=0, horizon_length=25,
                                     wind_gust_probability=0.5, **kwargs):
     env = create_wrapped_beach_walk(size=size, agent_start_pos=agent_start_pos, agent_start_dir=agent_start_dir,
                                     wind_gust_probability=wind_gust_probability, **kwargs)
