@@ -33,6 +33,7 @@ class BeachWalkEnv(MiniGridEnv):
         )
         self.actions = Actions
         self.action_space = Discrete(len(self.actions))
+        self.reward_range = (-1, 1)
 
         self.total_step_count = 0
 
