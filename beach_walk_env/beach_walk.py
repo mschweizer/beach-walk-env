@@ -5,7 +5,7 @@ from gym_minigrid.wrappers import FullyObsWrapper
 from seals.util import AutoResetWrapper
 
 from beach_walk_env.actions import Actions
-from beach_walk_env.observation_wrapper import CustomObsWrapper
+from beach_walk_env.wrapper import CustomObsWrapper, TrueEpisodeMonitor
 from beach_walk_env.water import Water
 
 
@@ -84,20 +84,25 @@ class BeachWalkEnv(MiniGridEnv):
         # Get the contents of the cell in front of the agent
         fwd_cell = self.grid.get(*fwd_pos)
 
+        info = {}
+
         if fwd_cell is None or fwd_cell.can_overlap():
             self.agent_pos = fwd_pos
         if fwd_cell is not None and fwd_cell.type == 'goal':
             done = True
             reward = self._reward()
+            info["episode_end"] = "success"
         if fwd_cell is not None and fwd_cell.type == 'lava':
             done = True
-
+            info["episode_end"] = "failure"
         if self.step_count >= self.max_steps:
             done = True
+            if "episode_end" not in info:
+                info["episode_end"] = "timeout"
 
         obs = self.gen_obs()
 
-        return obs, reward, done, {}
+        return obs, reward, done, info
 
 
 def create_wrapped_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=150,
@@ -113,6 +118,7 @@ def create_fixed_horizon_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_
                                     wind_gust_probability=0.5, **kwargs):
     env = create_wrapped_beach_walk(size=size, agent_start_pos=agent_start_pos, agent_start_dir=agent_start_dir,
                                     wind_gust_probability=wind_gust_probability, **kwargs)
+    env = TrueEpisodeMonitor(env)
     env = AutoResetWrapper(env)
     env = TimeLimit(env, max_episode_steps=horizon_length)
     return env
