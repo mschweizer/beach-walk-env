@@ -15,11 +15,14 @@ class BeachWalkEnv(MiniGridEnv):
     }
 
     def __init__(self, size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=25, wind_gust_probability=0.5,
-                 **kwargs):
+                 reward_discount=1.0, penalty_discount=1.0, **kwargs):
         self.mission = None
         self.agent_start_pos = agent_start_pos
         self.agent_start_dir = agent_start_dir
         self.wind_gust_probability = wind_gust_probability
+
+        self.reward_discount = reward_discount
+        self.penalty_discount = penalty_discount
 
         super().__init__(
             grid_size=size,
@@ -92,6 +95,7 @@ class BeachWalkEnv(MiniGridEnv):
             info["episode_end"] = "success"
         if fwd_cell is not None and fwd_cell.type == 'lava':
             done = True
+            reward = self._penalty()
             info["episode_end"] = "failure"
         if self.step_count >= self.max_steps:
             done = True
@@ -101,6 +105,12 @@ class BeachWalkEnv(MiniGridEnv):
         obs = self.gen_obs()
 
         return obs, reward, done, info
+
+    def _reward(self):
+        return 1 * self.reward_discount**self.step_count
+
+    def _penalty(self):
+        return -1 * self.penalty_discount**self.step_count
 
 
 def create_wrapped_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=150,
