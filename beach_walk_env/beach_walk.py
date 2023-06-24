@@ -15,7 +15,7 @@ class BeachWalkEnv(MiniGridEnv):
     }
 
     def __init__(self, size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=25, wind_gust_probability=0.5,
-                 reward=1., penalty=-1., reward_discount=1., penalty_discount=1., **kwargs):
+                 reward=1., penalty=-1., discount=1., **kwargs):
         self.mission = None
         self.agent_start_pos = agent_start_pos
         self.agent_start_dir = agent_start_dir
@@ -23,8 +23,9 @@ class BeachWalkEnv(MiniGridEnv):
 
         self.reward = reward
         self.penalty = penalty
-        self.reward_discount = reward_discount
-        self.penalty_discount = penalty_discount
+        self.discount = discount
+
+        self.reward_spec = {"reward": self.reward, "penalty": self.penalty, "discount": self.discount}
 
         super().__init__(
             grid_size=size,
@@ -110,16 +111,15 @@ class BeachWalkEnv(MiniGridEnv):
         return obs, reward, done, info
 
     def _reward(self):
-        return self.reward * self.reward_discount**self.step_count
+        return self.reward * self.discount**self.step_count
 
     def _penalty(self):
-        return self.penalty * self.penalty_discount**self.step_count
+        return self.penalty * self.discount**self.step_count
 
 
 def create_wrapped_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=150,
                               wind_gust_probability=0.5, **kwargs):
-    env = BeachWalkEnv(size, agent_start_pos, agent_start_dir, max_steps,
-                       wind_gust_probability, **kwargs)
+    env = BeachWalkEnv(size, agent_start_pos, agent_start_dir, max_steps, wind_gust_probability, **kwargs)
     env = FullyObsWrapper(env)
     env = CustomObsWrapper(env)
     return env
