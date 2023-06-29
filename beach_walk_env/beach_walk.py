@@ -97,14 +97,17 @@ class BeachWalkEnv(MiniGridEnv):
             done = True
             reward = self._reward()
             info["episode_end"] = "success"
+            info["is_success"] = True
         if fwd_cell is not None and fwd_cell.type == 'lava':
             done = True
             reward = self._penalty()
             info["episode_end"] = "failure"
+            info["is_success"] = False
         if self.step_count >= self.max_steps:
             done = True
             if "episode_end" not in info:
                 info["episode_end"] = "timeout"
+                info["is_success"] = False
 
         obs = self.gen_obs()
 
