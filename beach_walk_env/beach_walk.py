@@ -5,8 +5,8 @@ from gym_minigrid.wrappers import FullyObsWrapper
 from seals.util import AutoResetWrapper
 
 from beach_walk_env.actions import Actions
-from beach_walk_env.wrapper import CustomObsWrapper, TrueEpisodeMonitor
 from beach_walk_env.water import Water
+from beach_walk_env.wrapper import CustomObsWrapper, TrueEpisodeMonitor
 
 
 class BeachWalkEnv(MiniGridEnv):
@@ -111,10 +111,10 @@ class BeachWalkEnv(MiniGridEnv):
         return obs, reward, done, info
 
     def _reward(self):
-        return self.reward * self.discount**self.step_count
+        return self.reward * self.discount ** self.step_count
 
     def _penalty(self):
-        return self.penalty * self.discount**self.step_count
+        return self.penalty * self.discount ** self.step_count
 
 
 def create_wrapped_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=150,

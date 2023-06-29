@@ -16,14 +16,14 @@ class CustomObsWrapper(gym.core.ObservationWrapper):
         self.observation_space = spaces.Box(
             low=0,
             high=max(OBJECT_TO_IDX.values()),
-            shape=(self.env.width, self.env.height, 2),  # number of cells
+            shape=(self.env.width, self.env.height),  # number of cells
             dtype="uint8",
         )
 
     def observation(self, observation):
         only_img = observation['image']
-        only_obj_type_and_agent_dir = only_img[:, :, (0, 2)]
-        return only_obj_type_and_agent_dir
+        only_obj_type = only_img[:, :, 0]
+        return only_obj_type
 
 
 class TrueEpisodeMonitor(Monitor):
