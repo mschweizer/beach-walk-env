@@ -124,17 +124,18 @@ class BeachWalkEnv(MiniGridEnv):
 
 
 def create_wrapped_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=150,
-                              wind_gust_probability=0.5, **kwargs):
-    env = BeachWalkEnv(size, agent_start_pos, agent_start_dir, max_steps, wind_gust_probability, **kwargs)
+                              wind_gust_probability=0.5, discount=1., **kwargs):
+    env = BeachWalkEnv(size, agent_start_pos, agent_start_dir, max_steps, wind_gust_probability, discount=discount,
+                       **kwargs)
     env = FullyObsWrapper(env)
     env = CustomObsWrapper(env)
     return env
 
 
 def create_fixed_horizon_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_dir=0, horizon_length=25,
-                                    wind_gust_probability=0.5, **kwargs):
+                                    wind_gust_probability=0.5, discount=1.0, **kwargs):
     env = create_wrapped_beach_walk(size=size, agent_start_pos=agent_start_pos, agent_start_dir=agent_start_dir,
-                                    wind_gust_probability=wind_gust_probability, **kwargs)
+                                    wind_gust_probability=wind_gust_probability, discount=discount, **kwargs)
     env = TrueEpisodeMonitor(env)
     env = AutoResetWrapper(env)
     env = TimeLimit(env, max_episode_steps=horizon_length)
