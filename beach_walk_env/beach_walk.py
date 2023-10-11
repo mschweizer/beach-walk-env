@@ -10,9 +10,9 @@ from beach_walk_env.wrapper import CustomObsWrapper, TrueEpisodeMonitor
 
 
 class BeachWalkEnv(MiniGridEnv):
-    metadata = {
-        'video.frames_per_second': 5
-    }
+    MiniGridEnv.metadata.update(
+        {'video.frames_per_second': 5}
+    )
 
     def __init__(self, size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=25, wind_gust_probability=0.5,
                  reward=1., penalty=-1., discount=1., **kwargs):
