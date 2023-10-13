@@ -73,13 +73,17 @@ class BeachWalkEnv(MiniGridEnv):
         return "Reach the goal without falling into the water."
 
     def step(self, action):
+        reward = 0.0
+        done = False
+        info = {}
+
+        if action is None:
+            return self.gen_obs(), reward, done, info
+
         if self._rand_float(0, 1) < self.wind_gust_probability:
             action = self.action_space.sample()
 
         self.step_count += 1
-
-        reward = 0.0
-        done = False
 
         # Turn agent in the direction it tries to move
         self.agent_dir = action
@@ -89,8 +93,6 @@ class BeachWalkEnv(MiniGridEnv):
 
         # Get the contents of the cell in front of the agent
         fwd_cell = self.grid.get(*fwd_pos)
-
-        info = {}
 
         if fwd_cell is None or fwd_cell.can_overlap():
             self.agent_pos = fwd_pos
