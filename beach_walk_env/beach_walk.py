@@ -1,3 +1,4 @@
+import numpy as np
 from gym.spaces import Discrete
 from gym.wrappers import TimeLimit
 from gym_minigrid.minigrid import MiniGridEnv, Grid, Goal, Floor, TILE_PIXELS
@@ -121,6 +122,10 @@ class BeachWalkEnv(MiniGridEnv):
 
     def render(self, mode='human', close=False, highlight=False, tile_size=TILE_PIXELS):
         return super().render(mode, close, highlight, tile_size)
+
+    def put_agent(self, i, j):
+        self.grid.set(i, j, None)
+        self.agent_pos = np.array((i, j))
 
 
 def create_wrapped_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=150,
