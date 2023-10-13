@@ -126,7 +126,8 @@ class BeachWalkEnv(MiniGridEnv):
         return super().render(mode, close, highlight, tile_size)
 
     def put_agent(self, i, j):
-        self.grid.set(i, j, None)
+        assert i >= 0 and i < self.width
+        assert j >= 0 and j < self.height
         self.agent_pos = np.array((i, j))
 
 
