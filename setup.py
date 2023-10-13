@@ -14,6 +14,7 @@ setup(name='beach_walk_env',
           'gym==0.21',
           'matplotlib==3.5.1',
           'seals',
+          'numpy',
       ],
       tests_require=[
           'pytest',
