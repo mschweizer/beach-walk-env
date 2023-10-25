@@ -13,7 +13,7 @@ setup(name='beach_walk_env',
           'gym-minigrid==1.0.3',
           'gym==0.21',
           'matplotlib==3.5.1',
-          'seals',
+          'seals<0.2',
           'numpy',
       ],
       tests_require=[
