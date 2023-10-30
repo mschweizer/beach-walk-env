@@ -7,7 +7,7 @@ from seals.util import AutoResetWrapper
 
 from beach_walk_env.actions import Actions
 from beach_walk_env.water import Water
-from beach_walk_env.wrapper import CustomObsWrapper, TrueEpisodeMonitor
+from beach_walk_env.wrapper import CustomObsWrapper, TrueEpisodeMonitor, OneHotObsWrapper
 
 
 class BeachWalkEnv(MiniGridEnv):
@@ -137,6 +137,7 @@ def create_wrapped_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_dir=0,
                        **kwargs)
     env = FullyObsWrapper(env)
     env = CustomObsWrapper(env)
+    env = OneHotObsWrapper(env)
     return env
 
 
