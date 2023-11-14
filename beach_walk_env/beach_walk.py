@@ -7,7 +7,9 @@ from seals.util import AutoResetWrapper
 
 from beach_walk_env.actions import Actions
 from beach_walk_env.water import Water
-from beach_walk_env.wrapper import CustomObsWrapper, TrueEpisodeMonitor, OneHotObsWrapper
+from beach_walk_env.one_hot_observation_wrapper import OneHotObsWrapper
+from beach_walk_env.true_episode_monitor import TrueEpisodeMonitor
+from beach_walk_env.observation_wrapper import CustomObsWrapper
 
 
 class BeachWalkEnv(MiniGridEnv):
