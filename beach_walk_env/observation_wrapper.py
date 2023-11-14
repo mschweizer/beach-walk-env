@@ -2,6 +2,7 @@ from gymnasium import ObservationWrapper, spaces
 from minigrid.core.constants import OBJECT_TO_IDX
 
 
+# TODO: replace by ImgObsWrapper?
 class CustomObsWrapper(ObservationWrapper):
     def __init__(self, env):
         super().__init__(env)

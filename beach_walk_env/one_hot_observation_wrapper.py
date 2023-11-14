@@ -1,7 +1,6 @@
-import gym.core
 import numpy as np
-from gym import spaces
-from gym_minigrid.minigrid import OBJECT_TO_IDX
+from gymnasium import ObservationWrapper, spaces
+from minigrid.core.constants import OBJECT_TO_IDX
 
 # the object types that are occurring in the environment,
 # all other object types are not considered for encoding and will raise an assertion error
@@ -27,7 +26,7 @@ def encode_one_hot(obs, out_shape):
     return out
 
 
-class OneHotObsWrapper(gym.core.ObservationWrapper):
+class OneHotObsWrapper(ObservationWrapper):
     """
     Wrapper to get a one-hot encoding of a fully observable
     agent view as observation.

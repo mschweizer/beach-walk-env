@@ -1,22 +1,23 @@
 import numpy as np
-from seals.util import AutoResetWrapper
-
 from gymnasium.spaces import Discrete
+from gymnasium.wrappers import TimeLimit
 from minigrid.core.grid import Grid
 from minigrid.core.mission import MissionSpace
 from minigrid.core.world_object import Floor, Goal
 from minigrid.minigrid_env import MiniGridEnv
+from minigrid.wrappers import FullyObsWrapper
+from seals.util import AutoResetWrapper
 
 from beach_walk_env.actions import Actions
-from beach_walk_env.water import Water
+from beach_walk_env.observation_wrapper import CustomObsWrapper
 from beach_walk_env.one_hot_observation_wrapper import OneHotObsWrapper
 from beach_walk_env.true_episode_monitor import TrueEpisodeMonitor
-from beach_walk_env.observation_wrapper import CustomObsWrapper
+from beach_walk_env.water import Water
 
 
 class BeachWalkEnv(MiniGridEnv):
     MiniGridEnv.metadata.update(
-        {'video.frames_per_second': 5}
+        {"render_fps": 5}
     )
 
     def __init__(self, size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=25, wind_gust_probability=0.5,
@@ -37,6 +38,7 @@ class BeachWalkEnv(MiniGridEnv):
             max_steps=max_steps,
             # Set this to True for maximum speed
             see_through_walls=True,
+            highlight=False,
             **kwargs
         )
         self.actions = Actions
@@ -126,9 +128,6 @@ class BeachWalkEnv(MiniGridEnv):
 
     def _penalty(self):
         return self.penalty * self.discount ** self.step_count
-
-    def render(self, mode='human', close=False, highlight=False, tile_size=TILE_PIXELS):
-        return super().render(mode, close, highlight, tile_size)
 
     def put_agent(self, i, j):
         assert 0 <= i < self.width
