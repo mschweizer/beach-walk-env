@@ -30,10 +30,10 @@ class BeachWalkManualControl(ManualControl):
             return
 
         key_to_action = {
-            "left": self.env.actions.left,
-            "right": self.env.actions.right,
-            "up": self.env.actions.up,
-            "down": self.env.actions.down,
+            "left": self.env.unwrapped.actions.left,
+            "right": self.env.unwrapped.actions.right,
+            "up": self.env.unwrapped.actions.up,
+            "down": self.env.unwrapped.actions.down,
         }
         if key in key_to_action.keys():
             action = key_to_action[key]

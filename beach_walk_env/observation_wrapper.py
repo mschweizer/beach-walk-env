@@ -9,7 +9,7 @@ class CustomObsWrapper(ObservationWrapper):
         self.observation_space = spaces.Box(
             low=0,
             high=max(OBJECT_TO_IDX.values()),
-            shape=(self.env.width, self.env.height),  # number of cells
+            shape=(self.env.unwrapped.width, self.env.unwrapped.height),  # number of cells
             dtype="uint8",
         )
 
