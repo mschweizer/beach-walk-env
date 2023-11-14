@@ -1,5 +1,5 @@
-from gym_minigrid.minigrid import Lava
-from gym_minigrid.rendering import fill_coords, point_in_rect, point_in_line
+from minigrid.core.world_object import Lava
+from minigrid.utils.rendering import fill_coords, point_in_rect, point_in_line
 
 
 class Water(Lava):

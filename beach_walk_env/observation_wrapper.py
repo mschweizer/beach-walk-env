@@ -1,9 +1,8 @@
-import gym.core
-from gym import spaces
-from gym_minigrid.minigrid import OBJECT_TO_IDX
+from gymnasium import ObservationWrapper, spaces
+from minigrid.core.constants import OBJECT_TO_IDX
 
 
-class CustomObsWrapper(gym.core.ObservationWrapper):
+class CustomObsWrapper(ObservationWrapper):
     def __init__(self, env):
         super().__init__(env)
         self.observation_space = spaces.Box(

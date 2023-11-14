@@ -1,9 +1,11 @@
 import numpy as np
-from gym.spaces import Discrete
-from gym.wrappers import TimeLimit
-from gym_minigrid.minigrid import MiniGridEnv, Grid, Goal, Floor, TILE_PIXELS
-from gym_minigrid.wrappers import FullyObsWrapper
 from seals.util import AutoResetWrapper
+
+from gymnasium.spaces import Discrete
+from minigrid.core.grid import Grid
+from minigrid.core.mission import MissionSpace
+from minigrid.core.world_object import Floor, Goal
+from minigrid.minigrid_env import MiniGridEnv
 
 from beach_walk_env.actions import Actions
 from beach_walk_env.water import Water
@@ -19,7 +21,6 @@ class BeachWalkEnv(MiniGridEnv):
 
     def __init__(self, size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=25, wind_gust_probability=0.5,
                  reward=1., penalty=-1., discount=1., **kwargs):
-        self.mission = None
         self.agent_start_pos = agent_start_pos
         self.agent_start_dir = agent_start_dir
         self.wind_gust_probability = wind_gust_probability
@@ -31,6 +32,7 @@ class BeachWalkEnv(MiniGridEnv):
         self.reward_spec = {"reward": self.reward, "penalty": self.penalty, "discount": self.discount}
 
         super().__init__(
+            mission_space=MissionSpace(mission_func=lambda: "Avoid the water and get to the green goal square."),
             grid_size=size,
             max_steps=max_steps,
             # Set this to True for maximum speed
@@ -76,11 +78,12 @@ class BeachWalkEnv(MiniGridEnv):
 
     def step(self, action):
         reward = 0.0
-        done = False
+        terminated = False
+        truncated = False
         info = {}
 
         if action is None:
-            return self.gen_obs(), reward, done, info
+            return self.gen_obs(), reward, terminated, truncated, info
 
         if self._rand_float(0, 1) < self.wind_gust_probability:
             action = self.action_space.sample()
@@ -99,24 +102,24 @@ class BeachWalkEnv(MiniGridEnv):
         if fwd_cell is None or fwd_cell.can_overlap():
             self.agent_pos = fwd_pos
         if fwd_cell is not None and fwd_cell.type == 'goal':
-            done = True
+            terminated = True
             reward = self._reward()
             info["episode_end"] = "success"
             info["is_success"] = True
         if fwd_cell is not None and fwd_cell.type == 'lava':
-            done = True
+            terminated = True
             reward = self._penalty()
             info["episode_end"] = "failure"
             info["is_success"] = False
         if self.step_count >= self.max_steps:
-            done = True
+            truncated = True
             if "episode_end" not in info:
                 info["episode_end"] = "timeout"
                 info["is_success"] = False
 
         obs = self.gen_obs()
 
-        return obs, reward, done, info
+        return obs, reward, terminated, truncated, info
 
     def _reward(self):
         return self.reward * self.discount ** self.step_count

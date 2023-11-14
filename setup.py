@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='beach_walk_env',
-      version='0.1',
+      version='0.2',
       description='In this grid world, the agent walks at the beach and may be pushed '
                   'in a random direction by strong winds.',
       url='https://github.com/mschweizer/beach-walk-env',
@@ -10,16 +10,17 @@ setup(name='beach_walk_env',
       license='MIT',
       packages=find_packages(),
       install_requires=[
-          'gym-minigrid==1.0.3',
-          'gym==0.21',
+          'minigrid==2.2.1',
+          'gymnasium==0.28.1',
           'matplotlib==3.5.1',
-          'seals<0.2',
+          'seals',
           'numpy',
+          'stable-baselines3',
       ],
       tests_require=[
           'pytest',
           'pytest-cov',
       ],
       include_package_data=True,
-      python_requires='>=3.7',
+      python_requires='>=3.10',
       )
