@@ -10,6 +10,8 @@ from minigrid.wrappers import ImgObsWrapper, RGBImgPartialObsWrapper
 from beach_walk_env import BeachWalkEnv
 
 
+# TODO: see gymnasium.Visualization class "Allows one to play the game using keyboard."
+#  https://gymnasium.farama.org/api/utils/
 class BeachWalkManualControl(ManualControl):
     def __init__(self, env: BeachWalkEnv, seed=None) -> None:
         assert isinstance(env.unwrapped, BeachWalkEnv)
