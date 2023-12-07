@@ -28,3 +28,13 @@ def test_agent_is_encoded_only_once():
 
     initial_obs, _ = one_hot_env.reset()
     assert len(np.argwhere(initial_obs[ONE_HOT_OBJECT_TO_LAYER_IDX["agent"]] == 1)) == 1
+
+
+def test_object_under_agent_is_encoded_too():
+    grid_size = 6
+    agent_position = (1, 2)
+    one_hot_env = create_one_hot_env(grid_size, agent_position)
+
+    initial_obs, _ = one_hot_env.reset()
+    underlying_obj_type = one_hot_env.unwrapped.grid.get(*agent_position).type
+    assert agent_position in np.argwhere(initial_obs[ONE_HOT_OBJECT_TO_LAYER_IDX[underlying_obj_type]] == 1)

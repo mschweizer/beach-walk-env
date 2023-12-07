@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='beach_walk_env',
-      version='0.2.1',
+      version='0.2.2',
       description='In this grid world, the agent walks at the beach and may be pushed '
                   'in a random direction by strong winds.',
       url='https://github.com/mschweizer/beach-walk-env',
