@@ -14,6 +14,8 @@ ONE_HOT_OBJECT_TO_LAYER_IDX = {
     "agent": 4,
 }
 
+ONE_HOT_LAYER_IDX_TO_OBJECT = dict(zip(ONE_HOT_OBJECT_TO_LAYER_IDX.values(), ONE_HOT_OBJECT_TO_LAYER_IDX.keys()))
+
 ONE_HOT_ENCODED_OBJECTS_BY_TYPE_ID = tuple(OBJECT_TO_IDX[object_type] for object_type in ONE_HOT_OBJECT_TO_LAYER_IDX)
 
 

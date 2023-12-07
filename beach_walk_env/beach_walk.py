@@ -150,6 +150,6 @@ def create_fixed_horizon_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_
     env = create_wrapped_beach_walk(size=size, agent_start_pos=agent_start_pos, agent_start_dir=agent_start_dir,
                                     wind_gust_probability=wind_gust_probability, discount=discount, **kwargs)
     env = TrueEpisodeMonitor(env)
-    env = AutoResetWrapper(env)
+    env = AutoResetWrapper(env, discard_terminal_observation=False)
     env = TimeLimit(env, max_episode_steps=horizon_length)
     return env
