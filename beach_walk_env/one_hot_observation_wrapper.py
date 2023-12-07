@@ -10,13 +10,19 @@ ONE_HOT_OBJECT_TO_LAYER_IDX = {
     "wall": 0,
     "floor": 1,
     "goal": 2,
-    "lava": 3,
+    "water": 3,
     "agent": 4,
 }
 
 ONE_HOT_LAYER_IDX_TO_OBJECT = dict(zip(ONE_HOT_OBJECT_TO_LAYER_IDX.values(), ONE_HOT_OBJECT_TO_LAYER_IDX.keys()))
 
-ONE_HOT_ENCODED_OBJECTS_BY_TYPE_ID = tuple(OBJECT_TO_IDX[object_type] for object_type in ONE_HOT_OBJECT_TO_LAYER_IDX)
+ONE_HOT_ENCODED_OBJECTS_BY_TYPE_ID = []
+for object_type in ONE_HOT_OBJECT_TO_LAYER_IDX:
+    if object_type == "water":
+        ONE_HOT_ENCODED_OBJECTS_BY_TYPE_ID.append(OBJECT_TO_IDX["lava"])
+    else:
+        ONE_HOT_ENCODED_OBJECTS_BY_TYPE_ID.append(OBJECT_TO_IDX[object_type])
+
 
 
 class OneHotObsWrapper(ObservationWrapper):
@@ -64,7 +70,10 @@ class OneHotObsWrapper(ObservationWrapper):
 
     @staticmethod
     def _get_encoding_layer(object_type):
-        layer_id = ONE_HOT_OBJECT_TO_LAYER_IDX[object_type]
+        if object_type == "lava":
+            layer_id = ONE_HOT_OBJECT_TO_LAYER_IDX["water"]
+        else:
+            layer_id = ONE_HOT_OBJECT_TO_LAYER_IDX[object_type]
         return layer_id
 
     def _get_object_type_at_position(self, i, j, obs):
