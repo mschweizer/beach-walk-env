@@ -24,7 +24,6 @@ for object_type in ONE_HOT_OBJECT_TO_LAYER_IDX:
         ONE_HOT_ENCODED_OBJECTS_BY_TYPE_ID.append(OBJECT_TO_IDX[object_type])
 
 
-
 class OneHotObsWrapper(ObservationWrapper):
     """
     Wrapper to get a one-hot encoding of a fully observable
