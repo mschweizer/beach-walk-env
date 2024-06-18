@@ -78,7 +78,7 @@ class BeachWalkEnv(MiniGridEnv):
     def _create_mission_statement():
         return "Reach the goal without falling into the water."
 
-    def step(self, action):
+    def normal_step(self, action):
         reward = 0.0
         terminated = False
         truncated = False
@@ -87,20 +87,18 @@ class BeachWalkEnv(MiniGridEnv):
         if action is None:
             return self.gen_obs(), reward, terminated, truncated, info
 
-        if self._rand_float(0, 1) < self.wind_gust_probability:
-            action = self.action_space.sample()
-
         self.step_count += 1
 
         # Turn agent in the direction it tries to move
         self.agent_dir = action
-
+        
+        ## where is the mechanism that prevent the agent from going beyond the grid
+        ## or: what if self.front_pos lies beyond the grid?
         # Get the position in front of the agent
         fwd_pos = self.front_pos
-
+        
         # Get the contents of the cell in front of the agent
         fwd_cell = self.grid.get(*fwd_pos)
-
         if fwd_cell is None or fwd_cell.can_overlap():
             self.agent_pos = fwd_pos
         if fwd_cell is not None and fwd_cell.type == 'goal':
@@ -109,7 +107,7 @@ class BeachWalkEnv(MiniGridEnv):
             info["episode_end"] = "success"
             info["is_success"] = True
         if fwd_cell is not None and fwd_cell.type == 'lava':
-            terminated = True
+            terminated = True # problem
             reward = self._penalty()
             info["episode_end"] = "failure"
             info["is_success"] = False
@@ -118,9 +116,15 @@ class BeachWalkEnv(MiniGridEnv):
             if "episode_end" not in info:
                 info["episode_end"] = "timeout"
                 info["is_success"] = False
-
         obs = self.gen_obs()
+        
+        return obs, reward, terminated, truncated, info
 
+    def step(self, action):
+        obs, reward, terminated, truncated, info = self.normal_step(action)
+        if self._rand_float(0, 1) < self.wind_gust_probability:
+            action = self.action_space.sample()
+            obs, reward, terminated, truncated, info = self.normal_step(action)
         return obs, reward, terminated, truncated, info
 
     def _reward(self):
