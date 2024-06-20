@@ -20,11 +20,25 @@ class BeachWalkEnv(MiniGridEnv):
         {"render_fps": 5}
     )
 
-    def __init__(self, size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=25, wind_gust_probability=0.5,
-                 reward=1., penalty=-1., discount=1., **kwargs):
+    def __init__(
+        self, 
+        size=6, 
+        agent_start_pos=(1, 2), 
+        agent_start_dir=0, 
+        max_steps=25, 
+        wind_gust_probability=0.5,
+        windy=True,
+        wind_setting=None,
+        reward=1., 
+        penalty=-1., 
+        discount=1., 
+        **kwargs
+        ):
         self.agent_start_pos = agent_start_pos
         self.agent_start_dir = agent_start_dir
         self.wind_gust_probability = wind_gust_probability
+        self.windy = windy
+        self.wind_setting = wind_setting
 
         self.reward = reward
         self.penalty = penalty
@@ -78,7 +92,7 @@ class BeachWalkEnv(MiniGridEnv):
     def _create_mission_statement():
         return "Reach the goal without falling into the water."
 
-    def normal_step(self, action):
+    def _normal_step(self, action):
         reward = 0.0
         terminated = False
         truncated = False
@@ -92,9 +106,7 @@ class BeachWalkEnv(MiniGridEnv):
         # Turn agent in the direction it tries to move
         self.agent_dir = action
         
-        ## where is the mechanism that prevent the agent from going beyond the grid
-        ## or: what if self.front_pos lies beyond the grid?
-        # Get the position in front of the agent
+        ## where is the mechanism that prevent the agent from going beyond the grid??
         fwd_pos = self.front_pos
         
         # Get the contents of the cell in front of the agent
@@ -107,7 +119,7 @@ class BeachWalkEnv(MiniGridEnv):
             info["episode_end"] = "success"
             info["is_success"] = True
         if fwd_cell is not None and fwd_cell.type == 'lava':
-            terminated = True # problem
+            # terminated = True
             reward = self._penalty()
             info["episode_end"] = "failure"
             info["is_success"] = False
@@ -121,10 +133,23 @@ class BeachWalkEnv(MiniGridEnv):
         return obs, reward, terminated, truncated, info
 
     def step(self, action):
-        obs, reward, terminated, truncated, info = self.normal_step(action)
-        if self._rand_float(0, 1) < self.wind_gust_probability:
-            action = self.action_space.sample()
-            obs, reward, terminated, truncated, info = self.normal_step(action)
+        if self.windy:
+            # if the wind effect overwrites the original action
+            if self.wind_setting == "overwrite":
+                if self._rand_float(0, 1) < self.wind_gust_probability:
+                    action = self.action_space.sample()
+                obs, reward, terminated, truncated, info = self._normal_step(action)
+            # the wind blows after the action being taken
+            elif self.wind_setting == "stack": 
+                obs, reward, terminated, truncated, info = self._normal_step(action)
+                if not terminated and not truncated:
+                    if self._rand_float(0, 1) < self.wind_gust_probability:
+                        action = self.action_space.sample()
+                        obs, reward, terminated, truncated, info = self._normal_step(action)
+            else:
+                raise Exception("Wind Setting not supported")
+        else:
+            obs, reward, terminated, truncated, info = self._normal_step(action)
         return obs, reward, terminated, truncated, info
 
     def _reward(self):
