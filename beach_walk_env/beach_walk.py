@@ -119,10 +119,7 @@ class BeachWalkEnv(MiniGridEnv):
             info["episode_end"] = "success"
             info["is_success"] = True
         if fwd_cell is not None and fwd_cell.type == 'lava':
-            # terminated = True
             reward = self._penalty()
-            info["episode_end"] = "failure"
-            info["is_success"] = False
         if self.step_count >= self.max_steps:
             truncated = True
             if "episode_end" not in info:
