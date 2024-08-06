@@ -36,7 +36,6 @@ class BeachWalkEnv(MiniGridEnv):
         self.agent_start_pos = agent_start_pos
         self.agent_start_dir = agent_start_dir
         self.wind_gust_probability = wind_gust_probability
-        self.windy = self.wind_gust_probability > 0.0
         self.wind_setting = wind_setting
 
         self.reward = reward
@@ -129,24 +128,32 @@ class BeachWalkEnv(MiniGridEnv):
         return obs, reward, terminated, truncated, info
 
     def step(self, action):
-        if self.windy:
-            # if the wind effect overwrites the original action
-            if self.wind_setting == "overwrite":
-                if self._rand_float(0, 1) < self.wind_gust_probability:
-                    action = self.action_space.sample()
-                obs, reward, terminated, truncated, info = self._normal_step(action)
-            # the wind blows after the action being taken
-            elif self.wind_setting == "stack": 
-                obs, reward, terminated, truncated, info = self._normal_step(action)
-                if not terminated and not truncated:
-                    if self._rand_float(0, 1) < self.wind_gust_probability:
-                        action = self.action_space.sample()
-                        obs, reward, terminated, truncated, info = self._normal_step(action)
-            else:
-                raise Exception("Wind Setting not supported")
+        if self._wind_gust_occurs():
+            info, obs, reward, terminated, truncated = self._windy_step(action)
         else:
             obs, reward, terminated, truncated, info = self._normal_step(action)
         return obs, reward, terminated, truncated, info
+
+    def _wind_gust_occurs(self):
+        return self._rand_float(0, 1) < self.wind_gust_probability
+
+    def _windy_step(self, action):
+        # if the wind effect overwrites the original action
+        if self.wind_setting == "overwrite":
+            info, obs, reward, terminated, truncated = self._random_direction_step()
+        # the wind blows after the action being taken
+        elif self.wind_setting == "stack":
+            obs, reward, terminated, truncated, info = self._normal_step(action)
+            if not terminated and not truncated:
+                info, obs, reward, terminated, truncated = self._random_direction_step()
+        else:
+            raise Exception("Wind setting not supported")
+        return info, obs, reward, terminated, truncated
+
+    def _random_direction_step(self):
+        action = self.action_space.sample()
+        obs, reward, terminated, truncated, info = self._normal_step(action)
+        return info, obs, reward, terminated, truncated
 
     def _reward(self):
         return self.reward * self.discount ** self.step_count
