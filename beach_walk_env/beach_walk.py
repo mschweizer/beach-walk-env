@@ -20,11 +20,23 @@ class BeachWalkEnv(MiniGridEnv):
         {"render_fps": 5}
     )
 
-    def __init__(self, size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=25, wind_gust_probability=0.5,
-                 reward=1., penalty=-1., discount=1., **kwargs):
+    def __init__(
+        self, 
+        size=6, 
+        agent_start_pos=(1, 2), 
+        agent_start_dir=0, 
+        max_steps=25, 
+        wind_gust_probability=0.5,
+        wind_setting="stack",
+        reward=1., 
+        penalty=-1., 
+        discount=1., 
+        **kwargs
+    ):
         self.agent_start_pos = agent_start_pos
         self.agent_start_dir = agent_start_dir
         self.wind_gust_probability = wind_gust_probability
+        self.wind_setting = wind_setting
 
         self.reward = reward
         self.penalty = penalty
@@ -78,29 +90,21 @@ class BeachWalkEnv(MiniGridEnv):
     def _create_mission_statement():
         return "Reach the goal without falling into the water."
 
-    def step(self, action):
+    def _normal_step(self, action):
         reward = 0.0
         terminated = False
         truncated = False
         info = {}
 
-        if action is None:
-            return self.gen_obs(), reward, terminated, truncated, info
-
-        if self._rand_float(0, 1) < self.wind_gust_probability:
-            action = self.action_space.sample()
-
         self.step_count += 1
 
         # Turn agent in the direction it tries to move
         self.agent_dir = action
-
-        # Get the position in front of the agent
+        
         fwd_pos = self.front_pos
-
+        
         # Get the contents of the cell in front of the agent
         fwd_cell = self.grid.get(*fwd_pos)
-
         if fwd_cell is None or fwd_cell.can_overlap():
             self.agent_pos = fwd_pos
         if fwd_cell is not None and fwd_cell.type == 'goal':
@@ -109,19 +113,45 @@ class BeachWalkEnv(MiniGridEnv):
             info["episode_end"] = "success"
             info["is_success"] = True
         if fwd_cell is not None and fwd_cell.type == 'lava':
-            terminated = True
             reward = self._penalty()
-            info["episode_end"] = "failure"
-            info["is_success"] = False
         if self.step_count >= self.max_steps:
             truncated = True
             if "episode_end" not in info:
                 info["episode_end"] = "timeout"
                 info["is_success"] = False
-
         obs = self.gen_obs()
-
+        
         return obs, reward, terminated, truncated, info
+
+    def step(self, action):
+        if action is None:
+            return self.gen_obs(), 0., False, False, {}
+        if self._wind_gust_occurs():
+            info, obs, reward, terminated, truncated = self._windy_step(action)
+        else:
+            obs, reward, terminated, truncated, info = self._normal_step(action)
+        return obs, reward, terminated, truncated, info
+
+    def _wind_gust_occurs(self):
+        return self._rand_float(0, 1) < self.wind_gust_probability
+
+    def _windy_step(self, action):
+        # if the wind effect overwrites the original action
+        if self.wind_setting == "overwrite":
+            info, obs, reward, terminated, truncated = self._random_direction_step()
+        # the wind blows after the action being taken
+        elif self.wind_setting == "stack":
+            obs, reward, terminated, truncated, info = self._normal_step(action)
+            if not terminated and not truncated:
+                info, obs, reward, terminated, truncated = self._random_direction_step()
+        else:
+            raise Exception("Wind setting not supported")
+        return info, obs, reward, terminated, truncated
+
+    def _random_direction_step(self):
+        action = self.action_space.sample()
+        obs, reward, terminated, truncated, info = self._normal_step(action)
+        return info, obs, reward, terminated, truncated
 
     def _reward(self):
         return self.reward * self.discount ** self.step_count
