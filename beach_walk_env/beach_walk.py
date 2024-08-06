@@ -96,15 +96,11 @@ class BeachWalkEnv(MiniGridEnv):
         truncated = False
         info = {}
 
-        if action is None:
-            return self.gen_obs(), reward, terminated, truncated, info
-
         self.step_count += 1
 
         # Turn agent in the direction it tries to move
         self.agent_dir = action
         
-        # where is the mechanism that prevent the agent from going beyond the grid??
         fwd_pos = self.front_pos
         
         # Get the contents of the cell in front of the agent
@@ -128,6 +124,8 @@ class BeachWalkEnv(MiniGridEnv):
         return obs, reward, terminated, truncated, info
 
     def step(self, action):
+        if action is None:
+            return self.gen_obs(), 0., False, False, {}
         if self._wind_gust_occurs():
             info, obs, reward, terminated, truncated = self._windy_step(action)
         else:
