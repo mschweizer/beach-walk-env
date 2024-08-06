@@ -27,7 +27,7 @@ class BeachWalkEnv(MiniGridEnv):
         agent_start_dir=0, 
         max_steps=25, 
         wind_gust_probability=0.5,
-        wind_setting=None,
+        wind_setting="stack",
         reward=1., 
         penalty=-1., 
         discount=1., 
