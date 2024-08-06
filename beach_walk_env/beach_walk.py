@@ -28,6 +28,7 @@ class BeachWalkEnv(MiniGridEnv):
         max_steps=25, 
         wind_gust_probability=0.5,
         wind_setting="stack",
+        terminate_in_water=False,
         reward=1., 
         penalty=-1., 
         discount=1., 
@@ -37,6 +38,7 @@ class BeachWalkEnv(MiniGridEnv):
         self.agent_start_dir = agent_start_dir
         self.wind_gust_probability = wind_gust_probability
         self.wind_setting = wind_setting
+        self.terminate_in_water = terminate_in_water
 
         self.reward = reward
         self.penalty = penalty
@@ -98,13 +100,10 @@ class BeachWalkEnv(MiniGridEnv):
 
         self.step_count += 1
 
-        # Turn agent in the direction it tries to move
-        self.agent_dir = action
-        
+        self.agent_dir = action  # Turn agent in the direction it tries to move
         fwd_pos = self.front_pos
-        
-        # Get the contents of the cell in front of the agent
-        fwd_cell = self.grid.get(*fwd_pos)
+        fwd_cell = self.grid.get(*fwd_pos)  # Get the contents of the cell in front of the agent
+
         if fwd_cell is None or fwd_cell.can_overlap():
             self.agent_pos = fwd_pos
         if fwd_cell is not None and fwd_cell.type == 'goal':
@@ -114,6 +113,10 @@ class BeachWalkEnv(MiniGridEnv):
             info["is_success"] = True
         if fwd_cell is not None and fwd_cell.type == 'lava':
             reward = self._penalty()
+            if self.terminate_in_water:
+                terminated = True
+                info["episode_end"] = "failure"
+                info["is_success"] = False
         if self.step_count >= self.max_steps:
             truncated = True
             if "episode_end" not in info:
