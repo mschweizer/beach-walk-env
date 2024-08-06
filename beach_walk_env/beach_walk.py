@@ -27,17 +27,16 @@ class BeachWalkEnv(MiniGridEnv):
         agent_start_dir=0, 
         max_steps=25, 
         wind_gust_probability=0.5,
-        windy=True,
         wind_setting=None,
         reward=1., 
         penalty=-1., 
         discount=1., 
         **kwargs
-        ):
+    ):
         self.agent_start_pos = agent_start_pos
         self.agent_start_dir = agent_start_dir
         self.wind_gust_probability = wind_gust_probability
-        self.windy = windy
+        self.windy = self.wind_gust_probability > 0.0
         self.wind_setting = wind_setting
 
         self.reward = reward
@@ -106,7 +105,7 @@ class BeachWalkEnv(MiniGridEnv):
         # Turn agent in the direction it tries to move
         self.agent_dir = action
         
-        ## where is the mechanism that prevent the agent from going beyond the grid??
+        # where is the mechanism that prevent the agent from going beyond the grid??
         fwd_pos = self.front_pos
         
         # Get the contents of the cell in front of the agent
