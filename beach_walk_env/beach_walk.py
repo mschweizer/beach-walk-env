@@ -146,7 +146,8 @@ class BeachWalkEnv(MiniGridEnv):
         elif self.wind_setting == "stack":
             obs, reward, terminated, truncated, info = self._normal_step(action)
             if not terminated and not truncated:
-                obs, reward, terminated, truncated, info = self._random_direction_step()
+                obs, additional_reward, terminated, truncated, info = self._random_direction_step()
+                reward += additional_reward
         else:
             raise Exception("Wind setting not supported")
         return obs, reward, terminated, truncated, info
