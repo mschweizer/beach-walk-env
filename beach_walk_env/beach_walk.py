@@ -130,7 +130,7 @@ class BeachWalkEnv(MiniGridEnv):
         if action is None:
             return self.gen_obs(), 0., False, False, {}
         if self._wind_gust_occurs():
-            info, obs, reward, terminated, truncated = self._windy_step(action)
+            obs, reward, terminated, truncated, info = self._windy_step(action)
         else:
             obs, reward, terminated, truncated, info = self._normal_step(action)
         return obs, reward, terminated, truncated, info
@@ -141,20 +141,20 @@ class BeachWalkEnv(MiniGridEnv):
     def _windy_step(self, action):
         # if the wind effect overwrites the original action
         if self.wind_setting == "overwrite":
-            info, obs, reward, terminated, truncated = self._random_direction_step()
+            obs, reward, terminated, truncated, info = self._random_direction_step()
         # the wind blows after the action being taken
         elif self.wind_setting == "stack":
             obs, reward, terminated, truncated, info = self._normal_step(action)
             if not terminated and not truncated:
-                info, obs, reward, terminated, truncated = self._random_direction_step()
+                obs, reward, terminated, truncated, info = self._random_direction_step()
         else:
             raise Exception("Wind setting not supported")
-        return info, obs, reward, terminated, truncated
+        return obs, reward, terminated, truncated, info
 
     def _random_direction_step(self):
         action = self.action_space.sample()
         obs, reward, terminated, truncated, info = self._normal_step(action)
-        return info, obs, reward, terminated, truncated
+        return obs, reward, terminated, truncated, info
 
     def _reward(self):
         return self.reward * self.discount ** self.step_count
