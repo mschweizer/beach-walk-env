@@ -21,17 +21,17 @@ class BeachWalkEnv(MiniGridEnv):
     )
 
     def __init__(
-        self, 
-        size=6, 
-        agent_start_pos=(1, 2), 
-        agent_start_dir=0, 
-        max_steps=25, 
+        self,
+        size=6,
+        agent_start_pos=(1, 2),
+        agent_start_dir=0,
+        max_steps=25,
         wind_gust_probability=0.5,
         wind_setting="stack",
         terminate_in_water=False,
-        reward=1., 
-        penalty=-1., 
-        discount=1., 
+        reward=1.,
+        penalty=-1.,
+        discount=1.,
         **kwargs
     ):
         self.agent_start_pos = agent_start_pos
@@ -92,40 +92,6 @@ class BeachWalkEnv(MiniGridEnv):
     def _create_mission_statement():
         return "Reach the goal without falling into the water."
 
-    def _normal_step(self, action):
-        reward = 0.0
-        terminated = False
-        truncated = False
-        info = {}
-
-        self.step_count += 1
-
-        self.agent_dir = action  # Turn agent in the direction it tries to move
-        fwd_pos = self.front_pos
-        fwd_cell = self.grid.get(*fwd_pos)  # Get the contents of the cell in front of the agent
-
-        if fwd_cell is None or fwd_cell.can_overlap():
-            self.agent_pos = fwd_pos
-        if fwd_cell is not None and fwd_cell.type == 'goal':
-            terminated = True
-            reward = self._reward()
-            info["episode_end"] = "success"
-            info["is_success"] = True
-        if fwd_cell is not None and fwd_cell.type == 'lava':
-            reward = self._penalty()
-            if self.terminate_in_water:
-                terminated = True
-                info["episode_end"] = "failure"
-                info["is_success"] = False
-        if self.step_count >= self.max_steps:
-            truncated = True
-            if "episode_end" not in info:
-                info["episode_end"] = "timeout"
-                info["is_success"] = False
-        obs = self.gen_obs()
-        
-        return obs, reward, terminated, truncated, info
-
     def step(self, action):
         if action is None:
             return self.gen_obs(), 0., False, False, {}
@@ -157,11 +123,78 @@ class BeachWalkEnv(MiniGridEnv):
         obs, reward, terminated, truncated, info = self._normal_step(action)
         return obs, reward, terminated, truncated, info
 
+    def _normal_step(self, action):
+        self.step_count += 1
+        self._maybe_move_position(action)
+        reward, terminated, move_info = self._handle_move()
+        truncated, truncate_info = self._maybe_truncate_episode(move_info)
+        return self.gen_obs(), reward, terminated, truncated, {**move_info, **truncate_info}
+
+    def _maybe_move_position(self, action):
+        if self._can_move_in_intended_direction(action):
+            self.agent_pos = self.front_pos
+
+    def _can_move_in_intended_direction(self, action):
+        self.agent_dir = action  # Turn agent in the direction it tries to move
+        fwd_cell = self.grid.get(*self.front_pos)  # Get the contents of the cell in front of the agent
+        return fwd_cell is None or fwd_cell.can_overlap()
+
+    def _handle_move(self):
+        cell_type = self._get_current_cell_type()
+        if cell_type == 'goal':
+            reward, terminated, additional_info = self._treat_reaching_goal()
+        elif cell_type == 'lava':
+            reward, terminated, additional_info = self._treat_reaching_water()
+        else:
+            reward, terminated, additional_info = 0.0, False, {}
+        if cell_type:
+            additional_info["cell_type"] = cell_type if cell_type != 'lava' else 'water'
+        return reward, terminated, additional_info
+
+    def _get_current_cell_type(self):
+        current_agent_cell = self.grid.get(*self.agent_pos)
+        return current_agent_cell.type if current_agent_cell else None
+
+    def _treat_reaching_goal(self):
+        terminated = True
+        return self._reward(), terminated, self._create_info_for_reaching_goal()
+
     def _reward(self):
         return self.reward * self.discount ** self.step_count
 
+    @staticmethod
+    def _create_info_for_reaching_goal():
+        return dict(episode_end="success", is_success=True)
+
+    def _treat_reaching_water(self):
+        terminated = True
+        if self.terminate_in_water:
+            return self._penalty(), terminated, self._create_info_for_water_termination()
+        return self._penalty(), not terminated, {}
+
     def _penalty(self):
         return self.penalty * self.discount ** self.step_count
+
+    @staticmethod
+    def _create_info_for_water_termination():
+        return dict(episode_end="failure", is_success=False)
+
+    def _maybe_truncate_episode(self, current_info):
+        truncated = True
+        if self._steps_remaining() or self._just_reached_terminal_state(current_info):
+            return not truncated, {}
+        return truncated, self._create_info_for_truncation()
+
+    def _steps_remaining(self):
+        return self.step_count < self.max_steps
+
+    @staticmethod
+    def _just_reached_terminal_state(info):
+        return "episode_end" in info
+
+    @staticmethod
+    def _create_info_for_truncation():
+        return dict(episode_end="timeout", is_success=False)
 
     def put_agent(self, i, j):
         assert 0 <= i < self.width
