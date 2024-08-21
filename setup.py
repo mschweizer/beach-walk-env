@@ -12,7 +12,7 @@ setup(name='beach_walk_env',
       install_requires=[
           'minigrid',
           'gymnasium',
-          'matplotlib==3.5.1',
+          'matplotlib',
           'seals',
           'numpy',
           'stable-baselines3',
