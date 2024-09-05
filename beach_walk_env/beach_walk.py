@@ -60,6 +60,7 @@ class BeachWalkEnv(MiniGridEnv):
         self.reward_range = (-1, 1)
 
         self.total_step_count = 0
+        self.current_episode_steps_in_water = 0
 
     def _gen_grid(self, width, height):
         # Create an empty grid
@@ -99,7 +100,14 @@ class BeachWalkEnv(MiniGridEnv):
             obs, reward, terminated, truncated, info = self._wind_step(action)
         else:
             obs, reward, terminated, truncated, info = self._normal_step(action)
+        if terminated or truncated:
+            info = {**info, **self._finalize_episode()}
         return obs, reward, terminated, truncated, info
+
+    def _finalize_episode(self):
+        last_episode_steps_in_water = self.current_episode_steps_in_water
+        self.current_episode_steps_in_water = 0
+        return dict(steps_in_water=last_episode_steps_in_water)
 
     def _wind_gust_occurs(self):
         return self._rand_float(0, 1) < self.wind_gust_probability
@@ -167,6 +175,7 @@ class BeachWalkEnv(MiniGridEnv):
         return dict(episode_end="success", is_success=True)
 
     def _treat_reaching_water(self):
+        self.current_episode_steps_in_water += 1
         terminated = True
         if self.terminate_in_water:
             return self._penalty(), terminated, self._create_info_for_water_termination()

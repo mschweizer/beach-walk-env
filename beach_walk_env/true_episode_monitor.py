@@ -13,7 +13,9 @@ class TrueEpisodeMonitor(Monitor):
         observation, reward, terminated, truncated, info = super().step(action)
         if info.get("episode"):
             info["episode"]["is_success"] = info["is_success"]
+            info["episode"]["steps_in_water"] = info["steps_in_water"]
             info["true_episode"] = info["episode"]
             del info["is_success"]
+            del info["steps_in_water"]
             del info["episode"]
         return observation, reward, terminated, truncated, info
