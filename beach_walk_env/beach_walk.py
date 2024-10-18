@@ -210,6 +210,9 @@ class BeachWalkEnv(MiniGridEnv):
         assert 0 <= j < self.height
         self.agent_pos = np.array((i, j))
 
+    def set_wind_gust_probability(self, wind_gust_probability):
+        self.wind_gust_probability = wind_gust_probability
+
 
 def create_wrapped_beach_walk(size=6, agent_start_pos=(1, 2), agent_start_dir=0, max_steps=150,
                               wind_gust_probability=0.5, discount=1., **kwargs):
